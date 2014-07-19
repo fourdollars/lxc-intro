@@ -1,0 +1,14 @@
+body {                          
+    font-size: 140%;
+    font-family: Noto Sans T Chinese, Noto Sans;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+    border-bottom: 1px dashed;
+}
+
+a:hover {
+    text-decoration: underline;
+}

@@ -1,0 +1,214 @@
+ * General setup
+   * Control Group support
+
+CONFIG_CGROUPS:                                                      
+                                                                     
+This option adds support for grouping sets of processes together, for
+use with process control subsystems such as Cpusets, CFS, memory     
+controls or device isolation.                                        
+See                                                                  
+      - Documentation/scheduler/sched-design-CFS.txt   (CFS)         
+      - Documentation/cgroups/ (features for grouping, isolation     
+                                and resource control)                
+
+     -> Namespace cgroup subsystem
+
+CONFIG_CGROUP_NS:                                                 
+
+Provides a simple namespace cgroup subsystem to provide hierarchical
+naming of sets of namespaces, for instance virtual servers and
+checkpoint/restart jobs.
+
+2.6.24–2.6.39
+
+     -> Freezer cgroup subsystem
+
+CONFIG_CGROUP_FREEZER:                              
+                                                    
+Provides a way to freeze and unfreeze all tasks in a
+cgroup.                                             
+
+     -> Cpuset support
+
+CONFIG_CPUSETS:                                                
+                                                               
+This option will let you create and manage CPUSETs which       
+allow dynamically partitioning a system into sets of CPUs and  
+Memory Nodes and assigning tasks to run only within those sets.
+This is primarily useful on large SMP or NUMA systems.         
+
+     -> Simple CPU accounting cgroup subsystem
+
+CONFIG_CGROUP_CPUACCT:                                   
+                                                         
+Provides a simple Resource Controller for monitoring the 
+total CPU consumed by the tasks in a cgroup.             
+
+     -> Resource counters
+
+CONFIG_RESOURCE_COUNTERS:                                      
+                                                               
+This option enables controller independent resource accounting 
+infrastructure that works with cgroups.                        
+
+       -> Memory resource controllers for Control Groups
+
+CONFIG_MEMCG:                                                      
+                                                                   
+Provides a memory resource controller that manages both anonymous  
+memory and page cache. (See Documentation/cgroups/memory.txt)      
+                                                                   
+Note that setting this option increases fixed memory overhead      
+associated with each page of memory in the system. By this,        
+8(16)bytes/PAGE_SIZE on 32(64)bit system will be occupied by memory
+usage tracking struct at boot. Total amount of this is printed out 
+at boot.                                                           
+                                                                   
+Only enable when you're ok with these trade offs and really        
+sure you need the memory resource controller. Even when you enable 
+this, you can set "cgroup_disable=memory" at your boot option to   
+disable memory resource controller and you can avoid overheads.    
+(and lose benefits of memory resource controller)                  
+                                                                   
+This config option also selects MM_OWNER config option, which      
+could in turn add some fork/exit overhead.                         
+
+   * Group CPU scheduler
+
+CONFIG_CGROUP_SCHED:                                                 
+                                                                     
+This feature lets CPU scheduler recognize task groups and control CPU
+bandwidth allocation to such task groups. It uses cgroups to group   
+tasks.                                                               
+
+     -> Basis for grouping tasks (Control Groups)
+
+Not found on Ubuntu 14.04.
+https://www.kernel.org/doc/Documentation/scheduler/sched-rt-group.txt
+
+   * Namespaces support
+
+CONFIG_NAMESPACES:                                                 
+                                                                   
+Provides the way to make tasks work with different objects using   
+the same id. For example same IPC id may refer to different objects
+or same user id or pid may refer to different tasks when used in   
+different namespaces.                                              
+
+     -> UTS namespace
+
+CONFIG_UTS_NS:                                              
+                                                            
+In this namespace tasks see different info provided with the
+uname() system call                                         
+
+     -> IPC namespace
+
+CONFIG_IPC_NS:                                               
+                                                             
+In this namespace tasks work with IPC ids which correspond to
+different IPC objects in different namespaces.               
+
+     -> User namespace
+
+CONFIG_USER_NS:                                               
+                                                              
+This allows containers, i.e. vservers, to use user namespaces 
+to provide different user info for different servers.         
+                                                              
+When user namespaces are enabled in the kernel it is          
+recommended that the MEMCG and MEMCG_KMEM options also be     
+enabled and that user-space use the memory control groups to  
+limit the amount of memory a memory unprivileged users can    
+use.                                                          
+
+     -> Pid namespace
+
+CONFIG_PID_NS:                                              
+                                                            
+Support process id namespaces.  This allows having multiple 
+processes with the same pid as long as they are in different
+pid namespaces.  This is a building block of containers.    
+
+     -> Network namespace
+
+CONFIG_NET_NS:                                                 
+                                                               
+Allow user space to create what appear to be multiple instances
+of the network stack.                                          
+
+ * Device Drivers
+   * Character devices
+     -> Support multiple instances of devpts
+
+CONFIG_DEVPTS_MULTIPLE_INSTANCES:                               
+                                                                
+Enable support for multiple instances of devpts filesystem.     
+If you want to have isolated PTY namespaces (eg: in containers),
+say Y here.  Otherwise, say N. If enabled, each mount of devpts 
+filesystem with the '-o newinstance' option will create an      
+independent PTY namespace.                                      
+
+   * Network device support
+     -> MAC-VLAN support
+
+CONFIG_MACVLAN:                                                    
+                                                                   
+This allows one to create virtual interfaces that map packets to   
+or from specific MAC addresses to a particular interface.          
+                                                                   
+Macvlan devices can be added using the "ip" command from the       
+iproute2 package starting with the iproute2-2.6.23 release:        
+                                                                   
+"ip link add link <real dev> [ address MAC ] [ NAME ] type macvlan"
+                                                                   
+To compile this driver as a module, choose M here: the module      
+will be called macvlan.                                            
+
+     -> Virtual ethernet pair device
+
+CONFIG_VETH:                                                         
+                                                                     
+This device is a local ethernet tunnel. Devices are created in pairs.
+When one end receives the packet it appears on its pair and vice     
+versa.                                                               
+
+ * Networking
+   * Networking options
+     -> 802.1d Ethernet Bridging
+
+CONFIG_BRIDGE:                                                       
+                                                                     
+If you say Y here, then your Linux box will be able to act as an     
+Ethernet bridge, which means that the different Ethernet segments it 
+is connected to will appear as one Ethernet to the participants.     
+Several such bridges can work together to create even larger         
+networks of Ethernets using the IEEE 802.1 spanning tree algorithm.  
+As this is a standard, Linux bridges will cooperate properly with    
+other third party bridge products.                                   
+                                                                     
+In order to use the Ethernet bridge, you'll need the bridge          
+configuration tools; see <file:Documentation/networking/bridge.txt>  
+for location. Please read the Bridge mini-HOWTO for more             
+information.                                                         
+                                                                     
+If you enable iptables support along with the bridge support then you
+turn your bridge into a bridging IP firewall.                        
+iptables will then see the IP packets being bridged, so you need to  
+take this into account when setting up your firewall rules.          
+Enabling arptables support when bridging will let arptables see      
+bridged ARP traffic in the arptables FORWARD chain.                  
+                                                                     
+To compile this code as a module, choose M here: the module          
+will be called bridge.                                               
+
+ * Security options
+   -> File POSIX Capabilities
+
+CONFIG_SECURITY_FILE_CAPABILITIES:
+
+This enables filesystem capabilities, allowing you to give
+binaries a subset of root's powers without using setuid 0.
+
+(Removed from linux kernel 2.6.33 and above versions.)
+http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=b3a222e52e4d4be77cc4520a57af1a4a0d8222d1
